@@ -61,13 +61,10 @@ document.addEventListener("DOMContentLoaded",() => {
             }
           }
 
-
-
         keyboardButton.addEventListener("click", toggleKeyboard);
         closeKeyboard.addEventListener("click", toggleKeyboard);
         keyboard.addEventListener("click", typing);
       }
-
 
 //меню
 {
@@ -98,4 +95,33 @@ document.addEventListener("DOMContentLoaded",() => {
    })
 }
 
+//модальное окно
+{
+  document.body.insertAdjacentHTML('beforeend', `
+                <div class="youTuberModal">
+                  <div id="youtuberClose">&#215;</div>
+                  <div id="youtuberContainer"></div>
+                </div>
+  `);
+
+  const youtuberItems = document.querySelectorAll("[data-youtuber]"); //data-set
+  const youTuberModal = document.querySelector('.youTuberModal');
+  const youtuberContainer = document.getElementById('youtuberContainer');
+
+  youtuberItems.forEach(elem => {
+    elem.addEventListener("click", () => {
+      const idVideo = elem.dataset.youtuber;
+      youTuberModal.style.display = "block";
+
+      const youtuberFrame = document.createElement("iframe");
+      youtuberFrame.src = `https://youtube.com/embed/${idVideo}`;
+      youtuberContainer.insertAdjacentElement('beforeend', youtuberFrame);
+
+
+
+    })
+  })
+
+
+}
 })
