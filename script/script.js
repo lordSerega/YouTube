@@ -156,5 +156,9 @@ document.addEventListener("DOMContentLoaded",() => {
   });
 }
 
-
+//youtube
+{
+  const API_KEY = 'AIzaSyBqn81QYBBioC5wRARprJacWUimZgPiqII';
+  const CLIENT_ID = '681994325978-c8ti6kgthcuemsc34blj9nth1qkdlhjf.apps.googleusercontent.com';
+}
 });
