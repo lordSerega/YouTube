@@ -96,13 +96,9 @@ document.addEventListener("DOMContentLoaded",() => {
 }
 
 //модальное окно
-{
-  document.body.insertAdjacentHTML('beforeend', `
-                <div class="youTuberModal">
-                  <div id="youtuberClose">&#215;</div>
-                  <div id="youtuberContainer"></div>
-                </div>
-  `);
+
+
+const youtuber = () => {
 
   const youtuberItems = document.querySelectorAll("[data-youtuber]"); //data-set
   const youTuberModal = document.querySelector('.youTuberModal');
@@ -114,7 +110,7 @@ document.addEventListener("DOMContentLoaded",() => {
   const sizeVideo = () => {
     let ww = document.documentElement.clientWidth;
     let wh = document.documentElement.clientHeight;
-    console.log(ww);
+  //  console.log(ww);
 
     for (let i = 0; i < qw.length; i++) {
       if (ww > qw[i]) {
@@ -155,10 +151,146 @@ document.addEventListener("DOMContentLoaded",() => {
     window.removeEventListener('resize', sizeVideo);
   });
 }
+{
+  document.body.insertAdjacentHTML('beforeend', `
+                <div class="youTuberModal">
+                  <div id="youtuberClose">&#215;</div>
+                  <div id="youtuberContainer"></div>
+                </div>
+  `);
+  youtuber();
+}
 
-//youtube
+//API
 {
   const API_KEY = 'AIzaSyBqn81QYBBioC5wRARprJacWUimZgPiqII';
   const CLIENT_ID = '681994325978-c8ti6kgthcuemsc34blj9nth1qkdlhjf.apps.googleusercontent.com';
+  //авторизация
+  {
+
+    const buttonAuth = document.getElementById('authorize');
+    const authBlock = document.querySelector('.auth');
+    const errorAuth = err => {
+      console.error(err);
+      authBlock.style.display = '';
+    };
+
+    gapi.load("client:auth2", () => gapi.auth2.init({client_id: CLIENT_ID}));
+
+    const authenticate = () => gapi.auth2.getAuthInstance()
+       .signIn({scope: "https://www.googleapis.com/auth/youtube.readonly"})
+       .then(() =>  console.log("Sign-in successful"))
+       .catch(errorAuth);
+
+     const loadClient = () => {
+       gapi.client.setApiKey(API_KEY);
+       return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
+           .then(() =>  console.log("GAPI client loaded for API"))
+           .then(() => authBlock.style.display = 'none')
+           .catch (errorAuth);
+     }
+
+     buttonAuth.addEventListener('click',() => {
+        authenticate().then(loadClient)
+      })
+
+  }
+
+  //запросы
+  {
+
+    const gloTube = document.querySelector('.logo-academy');
+    const trends =document.getElementById('yt_trend');
+    const like = document.getElementById('like');
+    const activites = document.getElementById('yt_main')
+
+    const request = options => gapi.client.youtube[options.method]
+    .list(options)
+    .then(response => response.result.items)
+    .then(render)
+    .then(youtuber)
+    .catch(err => console.error('Во время запроса произошла ошибка: ' + err));
+
+    const render = data => {
+    //  console.log(data);
+      const ytWrapper = document.getElementById('yt-wrapper');
+      ytWrapper.textContent = '';
+      data.forEach(item => {
+        try {
+        const {id, id:{videoId},
+        snippet:{
+          channelTitle,
+          title,
+          resourceId: {
+            videoId: likedVideoId
+          } = {},
+          thumbnails:{
+            high:{
+              url
+            }
+          }
+        }
+      } = item;
+        ytWrapper.innerHTML += `
+          <div class="yt" data-youtuber="${likedVideoId || videoId || id}">
+            <div class="yt-thumbnail" style="--aspect-ratio:16/9;">
+              <img src="${url}" alt="thumbnail" class="yt-thumbnail__img">
+            </div>
+            <div class="yt-title">${title}</div>
+            <div class="yt-channel">${channelTitle}</div>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+      })
+    };
+
+    gloTube.addEventListener('click', () => {
+      request({
+        method: 'search',
+        part: 'snippet',
+        channelId: 'UCVswRUcKC-M35RzgPRv8qUg',
+        order: 'date',
+        maxResults: 6,
+      })
+
+    });
+
+    trends.addEventListener('click', () => {
+      request({
+        method: 'videos',
+        chart: 'mostPopular',
+        part: 'snippet',
+        regionCode: 'RU',
+        maxResults: 6,
+      })
+
+    });
+
+    like.addEventListener('click', () => {
+      request({
+        method: 'playlistItems',
+        part: 'snippet',
+        playlistId: 'LL-fg4Fr9LsbzwWVR2iMkwuQ',
+        maxResults: 6,
+      })
+
+    });
+
+//видео на моем канале
+    activites.addEventListener('click', () => {
+      request({
+        method: 'activities',
+        part: 'snippet',
+        channelId: 'UC-fg4Fr9LsbzwWVR2iMkwuQ',
+        maxResults: 6,
+      })
+
+        });
+
+
+
+  }
 }
 });
