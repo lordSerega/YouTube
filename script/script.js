@@ -212,7 +212,7 @@ const youtuber = () => {
     .catch(err => console.error('Во время запроса произошла ошибка: ' + err));
 
     const render = data => {
-    //  console.log(data);
+     console.log(data);
       const ytWrapper = document.getElementById('yt-wrapper');
       ytWrapper.textContent = '';
       data.forEach(item => {
@@ -281,9 +281,10 @@ const youtuber = () => {
 //видео на моем канале
     activites.addEventListener('click', () => {
       request({
-        method: 'activities',
+        method: 'videos',
+        chart: 'mostPopular',
         part: 'snippet',
-        channelId: 'UC-fg4Fr9LsbzwWVR2iMkwuQ',
+        regionCode: 'US',
         maxResults: 6,
       })
 
